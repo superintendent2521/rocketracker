@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starship Launch Tracking</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <h1>Starship Launch Tracking</h1>
+    <form id="launchForm">
+        <label for="boosterNumber">Booster Number:</label>
+        <input type="text" id="boosterNumber" name="boosterNumber" required>
+
+        <label for="shipNumber">Ship Number:</label>
+        <input type="text" id="shipNumber" name="shipNumber" required>
+
+        <label for="boosterFlightCount">Booster Flight Count:</label>
+        <input type="number" id="boosterFlightCount" name="boosterFlightCount" required>
+
+        <label for="shipFlightCount">Ship Flight Count:</label>
+        <input type="number" id="shipFlightCount" name="shipFlightCount" required>
+
+        <label for="launchSite">Launch Site:</label>
+        <select id="launchSite" name="launchSite" required>
+            <option value="Texas Pad 1">Texas Pad 1</option>
+            <option value="Texas Pad 2">Texas Pad 2</option>
+            <option value="LC-39A">LC-39A</option>
+            <option value="LC-40">LC-40</option>
+        </select>
+
+        <label for="launchDate">Launch Date:</label>
+        <input type="date" id="launchDate" name="launchDate" required>
+
+        <label for="launchTime">Launch Time:</label>
+        <input type="time" id="launchTime" name="launchTime" required>
+
+        <label for="livestream">Livestream URL:</label>
+        <input type="url" id="livestream" name="livestream">
+
+        <button type="submit">Submit Launch Report</button>
+    </form>
+
+    <script>
+        document.getElementById('launchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                boosterNumber: document.getElementById('boosterNumber').value,
+                shipNumber: document.getElementById('shipNumber').value,
+                boosterFlightCount: document.getElementById('boosterFlightCount').value,
+                shipFlightCount: document.getElementById('shipFlightCount').value,
+                launchSite: document.getElementById('launchSite').value,
+                launchDate: document.getElementById('launchDate').value,
+                launchTime: document.getElementById('launchTime').value,
+                livestream: document.getElementById('livestream').value
+            };
+
+            try {
+                const response = await fetch('/report/launch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Launch report submitted successfully!');
+                } else {
+                    alert('Error submitting launch report');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting launch report');
+            }
+        });
+    </script>
+</body>
+</html>
