@@ -1,1 +1,6 @@
-from pymongo import MongoClient
+from pymongo import AsyncMongoClient
+
+
+
+def save(LaunchReport):
+    print(LaunchReport)

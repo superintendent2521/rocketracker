@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 import json
 from datetime import datetime
-
+from . import database
 app = FastAPI()
 
 # Serve static files (CSS, JS, images, etc.)
@@ -35,8 +35,8 @@ async def submit_launch_report(report: LaunchReport):
 
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
+    database.save(report_data)
     #no db so print to console
-    print("Received launch report:", report_data)
     return {"message": "Launch report submitted successfully"}
 
 # Serve reporter.html
