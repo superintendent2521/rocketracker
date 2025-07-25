@@ -2,46 +2,20 @@ import fastapi
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 import json
 from datetime import datetime
 from . import database
+from src.api.routes import api_router
+from src.web.routes import html_router
 app = FastAPI()
 
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
 app.mount("/img", StaticFiles(directory="img"), name="img")
-
-# Data model for launch report
-class LaunchReport(BaseModel):
-    boosterNumber: str
-    shipNumber: str
-    boosterFlightCount: int
-    shipFlightCount: int
-    launchSite: str
-    launchDate: str
-    launchTime: str
-    livestream: Optional[str] = None
-
-# Serve index.html
-@app.get("/", response_class=HTMLResponse)
-async def read_index():
-    with open("view/index.html", "r") as file:
-        return HTMLResponse(content=file.read(), status_code=200)
-
-# Handle launch report submissions
-@app.post("/report/launch")
-async def submit_launch_report(report: LaunchReport):
-
-    report_data = report.dict()
-    report_data["timestamp"] = datetime.now().isoformat()
-    database.save(report_data)
-    #no db so print to console
-    return {"message": "Launch report submitted successfully"}
-
-# Serve reporter.html
-@app.get("/reporter", response_class=HTMLResponse)
-async def read_reporter():
-    with open("view/reporter.html", "r") as file:
-        return HTMLResponse(content=file.read(), status_code=200)
+app.include_router(api_router, prefix="/api")
+app.include_router(html_router)
