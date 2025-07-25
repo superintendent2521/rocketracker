@@ -1,10 +1,5 @@
-def start(log):
-    try:
-        if log == True:
-            print("Starting")
-            # Later API Backend startup
-        else:
-            print("")
-            #Backend stuff
-    except:
-        print("Something went wrong")
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from typing import union
+app = FastAPI()
+app.mount("/styles", StaticFiles(directory="styles"), name="static")
