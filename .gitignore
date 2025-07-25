@@ -1,2 +1,8 @@
-src/__pycache__
-.env
+# Python cache directories
+__pycache__/
+**/__pycache__/
+
+# Python compiled files
+*.pyc
+*.pyo
+*.pyd
