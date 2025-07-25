@@ -11,7 +11,10 @@ h1 {
     text-align: center;
     margin-bottom: 30px;
 }
-
+.content {
+    text-align: center;
+    margin-bottom: 30px;
+}
 form {
     display: flex;
     flex-direction: column;
