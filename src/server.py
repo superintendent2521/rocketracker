@@ -11,6 +11,7 @@ app = FastAPI()
 
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
+app.mount("/img", StaticFiles(directory="img"), name="img")
 
 # Data model for launch report
 class LaunchReport(BaseModel):
@@ -26,7 +27,7 @@ class LaunchReport(BaseModel):
 # Serve index.html
 @app.get("/", response_class=HTMLResponse)
 async def read_index():
-    with open("index.html", "r") as file:
+    with open("view/index.html", "r") as file:
         return HTMLResponse(content=file.read(), status_code=200)
 
 # Handle launch report submissions
@@ -42,5 +43,5 @@ async def submit_launch_report(report: LaunchReport):
 # Serve reporter.html
 @app.get("/reporter", response_class=HTMLResponse)
 async def read_reporter():
-    with open("reporter.html", "r") as file:
+    with open("view/reporter.html", "r") as file:
         return HTMLResponse(content=file.read(), status_code=200)
