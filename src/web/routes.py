@@ -22,6 +22,11 @@ async def read_index():
 async def read_reporter():
     with open("views/reporter.html", "r") as file:
         return HTMLResponse(content=file.read(), status_code=200)
+# Serve reporter.html
+@html_router.get("/viewer", response_class=HTMLResponse)
+async def read_reporter():
+    with open("views/view.html", "r") as file:
+        return HTMLResponse(content=file.read(), status_code=200)
 
 # Serve 404 page
 @html_router.get("/404", response_class=HTMLResponse)
