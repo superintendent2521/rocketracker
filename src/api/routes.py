@@ -36,10 +36,10 @@ async def submit_launch_report(report: LaunchReport):
 
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
-    save(report_data)    #save to db, uses await however not here, in db module
+    await save(report_data)    #save to db, uses await however not here, in db module
     return {"message": "Launch report submitted successfully"}
 
-@api_router.get("/api/getlaunches")
+@api_router.get("/getlaunches")
 async def recieve_launch_total():
     launch_total = await get_all_launches() # await because database operation
     return {"message": f"{launch_total}"}
