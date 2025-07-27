@@ -9,7 +9,7 @@ import json
 import re
 
 from datetime import datetime
-from ..database import save
+from ..database import save, get_all_launches
 api_router = APIRouter()
 
 
@@ -31,10 +31,15 @@ class LaunchReport(BaseModel):
 
 
 # Handle launch report submissions
-@api_router.post("/report/launch")
+@api_router.post("/report/launch") #await because db operation
 async def submit_launch_report(report: LaunchReport):
 
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
-    save(report_data)    #no db so print to console
+    save(report_data)    #save to db, uses await however not here, in db module
     return {"message": "Launch report submitted successfully"}
+
+@api_router.get("/api/getlaunches")
+async def recieve_launch_total():
+    launch_total = await get_all_launches() # await because database operation
+    return {"message": f"{launch_total}"}
