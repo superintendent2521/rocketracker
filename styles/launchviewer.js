@@ -1,10 +1,8 @@
 async function displayLaunches() {
-  // Create output element if it doesn't exist
-  let outputElement = document.getElementById('output');
-  if (!outputElement) {
-    outputElement = document.createElement('pre');
-    outputElement.id = 'output';
-    document.body.appendChild(outputElement);
+  const container = document.getElementById('launch-cards');
+  if (!container) {
+    console.error('Launch cards container not found');
+    return;
   }
 
   try {
@@ -18,18 +16,31 @@ async function displayLaunches() {
     
     const launches = JSON.parse(cleanedMessage);
     
-    const formattedText = launches.map(launch => 
-      `Booster ${launch.boosterNumber} (Flight ${launch.boosterFlightCount})
-       Ship ${launch.shipNumber} (Flight ${launch.shipFlightCount})
-       Launch: ${launch.launchDate} at ${launch.launchTime}
-       Site: ${launch.launchSite}
-       -------------------------`
-    ).join('\n');
+    launches.forEach(launch => {
+      const card = document.createElement('div');
+      card.className = 'launch-card';
+      
+      const title = document.createElement('div');
+      title.className = 'launch-title';
+      title.textContent = `Booster ${launch.boosterNumber}-${launch.boosterFlightCount} | Ship ${launch.shipNumber}-${launch.shipFlightCount}`;
+      
+      const details = document.createElement('div');
+      details.className = 'launch-details';
+      details.innerHTML = `
+        <div>${launch.launchSite}</div>
+        <div>${launch.launchDate} at ${launch.launchTime}</div>
+      `;
+      
+      card.appendChild(title);
+      card.appendChild(details);
+      container.appendChild(card);
+    });
 
-    outputElement.textContent = formattedText;
   } catch (error) {
     console.error('Error:', error);
-    outputElement.textContent = 'Error loading data: ' + error.message;
+    const errorElement = document.createElement('div');
+    errorElement.textContent = 'Error loading data: ' + error.message;
+    container.appendChild(errorElement);
   }
 }
 
