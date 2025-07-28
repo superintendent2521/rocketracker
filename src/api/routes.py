@@ -9,7 +9,7 @@ import json
 import re
 
 from datetime import datetime
-from ..database import save, get_all_launches
+from ..database import save, get_all_launches, get_specific_launch
 api_router = APIRouter()
 
 
@@ -29,7 +29,7 @@ class LaunchReport(BaseModel):
             raise ValueError('must be alphanumeric')
         return v
 
-
+# dont add /api/ it already gives you a /api/ prefix
 # Handle launch report submissions
 @api_router.post("/report/launch") #await because db operation
 async def submit_launch_report(report: LaunchReport):
@@ -47,5 +47,13 @@ async def get_launches():
         for launch in launches:
             launch['_id'] = str(launch['_id'])
         return launches  # Return array directly
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+#code of doom an dispair
+@api_router.get("/getlaunches/{launch_id}")
+async def get_id_specific_launch(launch_id: str):
+    try:
+        launches = await get_specific_launch(launch_id)   # call your service/repo
+        return launches
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

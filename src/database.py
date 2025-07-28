@@ -1,7 +1,7 @@
 from pymongo import AsyncMongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-
+from bson import ObjectId
 import os
 from dotenv import load_dotenv
 from pathlib import Path
@@ -35,11 +35,16 @@ async def get_all_launches():
         print(f"Error retrieving launches: {e}")
         return []
 
-async def get_specific_launch(launch_id):
-    """Retrieve a certain launch"""
+async def get_specific_launch(launch_id: str):
+    """Retrieve a specific launch by id string."""
     try:
-        launch = await collection.find_one({"_id": launch_id})
-        return launch
-    except Exception as e:
-        print(f"Error retrieving launch: {e}")
+        oid = ObjectId(launch_id)
+    except Exception:
+        # invalid 24-hex string
         return None
+
+    launch = await collection.find_one({"_id": oid})
+    if launch:
+        # convert ObjectId back to a readable string before returning
+        launch["_id"] = str(launch["_id"])
+    return launch
