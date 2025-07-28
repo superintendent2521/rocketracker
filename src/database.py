@@ -5,6 +5,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from bson import ObjectId
 
 # Load environment variables from parent directory
 env_path = Path(__file__).parent.parent / '.env'
@@ -38,7 +39,7 @@ async def get_all_launches():
 async def get_specific_launch(launch_id):
     """Retrieve a certain launch"""
     try:
-        launch = await collection.find_one({"_id": launch_id})
+        launch = await collection.find_one({"_id": ObjectId(launch_id)})
         return launch
     except Exception as e:
         print(f"Error retrieving launch: {e}")
