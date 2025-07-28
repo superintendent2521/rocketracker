@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import fastapi
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -38,8 +38,14 @@ async def submit_launch_report(report: LaunchReport):
     report_data["timestamp"] = datetime.now().isoformat()
     await save(report_data)    #save to db, uses await however not here, in db module
     return {"message": "Launch report submitted successfully"}
-
 @api_router.get("/getlaunches")
-async def recieve_launch_total():
-    launch_total = await get_all_launches() # await because database operation
-    return {"message": f"{launch_total}"}
+async def get_launches():
+    """Get all launch reports"""
+    try:
+        launches = await get_all_launches()
+        # Convert ObjectId to string for JSON serialization
+        for launch in launches:
+            launch['_id'] = str(launch['_id'])
+        return launches  # Return array directly
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

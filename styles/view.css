@@ -5,6 +5,8 @@
             padding: 20px;
         }
         .launch-card {
+
+            position: relative;
             border: 1px solid #ccc;
             border-radius: 10px;
             padding: 15px;
@@ -13,8 +15,20 @@
         .launch-title {
             font-size: 1.2em;
             margin-bottom: 10px;
-        }
-        .launch-details {
+}
+.launch-details {
             font-size: 0.9em;
             color: #666;
-        }
+}
+        /* ... existing styles ... */
+
+
+.flight-id {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.6em !important;  /* Force override with !important */
+    color: #888;
+    margin: 0;  /* Remove default paragraph margins */
+    line-height: 1;  /* Reduce line height for compact appearance */
+}

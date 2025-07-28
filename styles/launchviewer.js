@@ -1,47 +1,44 @@
-async function displayLaunches() {
-  const container = document.getElementById('launch-cards');
-  if (!container) {
-    console.error('Launch cards container not found');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/getlaunches');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+// Fetch and display launch data
+async function fetchLaunches() {
+    try {
+        const response = await fetch('/api/getlaunches');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Handle response which might be wrapped in a message object
+        const data = await response.json();
+        
+        // Extract launches array (either directly or from message property)
+        const launches = Array.isArray(data) ? data : 
+                          (data.message && Array.isArray(data.message) ? data.message : 
+                          (data.launches && Array.isArray(data.launches) ? data.launches : []));
+        
+        displayLaunches(launches);
+    } catch (error) {
+        console.error('Error fetching launches:', error);
+        document.getElementById('launch-cards').innerHTML = '<p>Error loading launch data</p>';
+    }
+}
+function displayLaunches(launches) {
+    const container = document.getElementById('launch-cards');
     
-    const data = await response.json();
-    const cleanedMessage = data.message
-      .replace(/ObjectId\('[^']+'\)/g, '""')
-      .replace(/'/g, '"');
+    if (!Array.isArray(launches) || launches.length === 0) {
+        container.innerHTML = '<p>No launches found</p>';
+        return;
+    }
     
-    const launches = JSON.parse(cleanedMessage);
-    
-    launches.forEach(launch => {
-      const card = document.createElement('div');
-      card.className = 'launch-card';
-      
-      const title = document.createElement('div');
-      title.className = 'launch-title';
-      title.textContent = `Booster ${launch.boosterNumber}-${launch.boosterFlightCount} | Ship ${launch.shipNumber}-${launch.shipFlightCount}`;
-      
-      const details = document.createElement('div');
-      details.className = 'launch-details';
-      details.innerHTML = `
-        <div>${launch.launchSite}</div>
-        <div>${launch.launchDate} at ${launch.launchTime}</div>
-      `;
-      
-      card.appendChild(title);
-      card.appendChild(details);
-      container.appendChild(card);
-    });
-
-  } catch (error) {
-    console.error('Error:', error);
-    const errorElement = document.createElement('div');
-    errorElement.textContent = 'Error loading data: ' + error.message;
-    container.appendChild(errorElement);
-  }
+    container.innerHTML = launches.map(launch => `
+        <div class="launch-card">
+            <h3>Launch ${launch.launchDate} at ${launch.launchTime}</h3>
+            <p><strong>Booster:</strong> ${launch.boosterNumber} (Flight #${launch.boosterFlightCount})</p>
+            <p><strong>Ship:</strong> ${launch.shipNumber} (Flight #${launch.shipFlightCount})</p>
+            <p><strong>Site:</strong> ${launch.launchSite}</p>
+            ${launch.livestream ? `<p><a href="${launch.livestream}" target="_blank">View Livestream</a></p>` : ''}
+            <p style="position:absolute;bottom:5px;right:5px;font-size:0.6em;color:#888;margin:0;line-height:1;">ID: ${launch._id}</p>
+        </div>
+    `).join('');
 }
 
-document.addEventListener('DOMContentLoaded', displayLaunches);
+// Load launches when page loads
+document.addEventListener('DOMContentLoaded', fetchLaunches);
