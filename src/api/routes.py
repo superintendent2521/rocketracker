@@ -24,9 +24,9 @@ class LaunchReport(BaseModel):
     livestream: Optional[str] = None
     
     @validator('boosterNumber', 'shipNumber')
-    def validate_alphanumeric(cls, v):
-        if not re.match("^[a-zA-Z0-9]+$", v):
-            raise ValueError('must be alphanumeric')
+    def validate_positive_numbers(cls, v):
+        if not isinstance(v, int) or v < 0:
+            raise ValueError('must be a positive integer')
         return v
 
 # dont add /api/ it already gives you a /api/ prefix
