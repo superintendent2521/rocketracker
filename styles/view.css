@@ -1,34 +1,82 @@
-        .launch-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .launch-card {
-
-            position: relative;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .launch-title {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+.launch-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
 }
-.launch-details {
-            font-size: 0.9em;
-            color: #666;
+
+.launch-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-        /* ... existing styles ... */
 
+.launch-card h3 {
+    margin-top: 0;
+    color: #333;
+}
 
-.flight-id {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    font-size: 0.6em !important;  /* Force override with !important */
-    color: #888;
-    margin: 0;  /* Remove default paragraph margins */
-    line-height: 1;  /* Reduce line height for compact appearance */
+.details-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.details-link:hover {
+    background-color: #0056b3;
+}
+
+.launch-detail {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.launch-detail-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.launch-detail-card h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.launch-detail-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.launch-detail-card th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    width: 30%;
+}
+.launch-detail-card td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.back-link {
+    display: inline-block;
+    margin: 20px;
+    padding: 10px 15px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.back-link:hover {
+    background-color: #5a6268;
 }

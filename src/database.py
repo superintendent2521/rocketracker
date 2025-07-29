@@ -5,6 +5,7 @@ from bson import ObjectId
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from bson import ObjectId
 
 # Load environment variables from parent directory
 env_path = Path(__file__).parent.parent / '.env'
