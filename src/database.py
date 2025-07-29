@@ -49,3 +49,29 @@ async def get_specific_launch(launch_id: str):
         # convert ObjectId back to a readable string before returning
         launch["_id"] = str(launch["_id"])
     return launch
+
+async def get_missions_by_ship(ship_number: str):
+    """Retrieve all missions completed by a specific ship"""
+    try:
+        cursor = collection.find({"shipNumber": ship_number})
+        missions = await cursor.to_list(length=None)
+        # Convert ObjectId to string for JSON serialization
+        for mission in missions:
+            mission["_id"] = str(mission["_id"])
+        return missions
+    except Exception as e:
+        print(f"Error retrieving missions for ship {ship_number}: {e}")
+        return []
+
+async def get_missions_by_booster(booster_number: str):
+    """Retrieve all missions completed by a specific booster"""
+    try:
+        cursor = collection.find({"boosterNumber": booster_number})
+        missions = await cursor.to_list(length=None)
+        # Convert ObjectId to string for JSON serialization
+        for mission in missions:
+            mission["_id"] = str(mission["_id"])
+        return missions
+    except Exception as e:
+        print(f"Error retrieving missions for booster {booster_number}: {e}")
+        return []

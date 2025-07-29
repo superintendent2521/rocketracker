@@ -9,7 +9,7 @@ import json
 import re
 
 from datetime import datetime
-from ..database import save, get_all_launches, get_specific_launch
+from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster
 api_router = APIRouter()
 
 
@@ -55,5 +55,23 @@ async def get_id_specific_launch(launch_id: str):
     try:
         launches = await get_specific_launch(launch_id)   # call your service/repo
         return launches
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/mission/ship/{id}")
+async def get_missions_by_ship_id(id: str):
+    """Get all missions completed by a specific ship using its assigned number"""
+    try:
+        missions = await get_missions_by_ship(id)
+        return missions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/mission/booster/{id}")
+async def get_missions_by_booster_id(id: str):
+    """Get all missions completed by a specific booster using its assigned number"""
+    try:
+        missions = await get_missions_by_booster(id)
+        return missions
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
