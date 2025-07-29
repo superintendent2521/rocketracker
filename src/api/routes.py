@@ -14,8 +14,8 @@ api_router = APIRouter()
 
 
 class LaunchReport(BaseModel):
-    boosterNumber: str
-    shipNumber: str
+    boosterNumber: int
+    shipNumber: int
     boosterFlightCount: int
     shipFlightCount: int
     launchSite: str
