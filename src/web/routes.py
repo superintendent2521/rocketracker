@@ -27,7 +27,11 @@ async def read_reporter():
 async def read_reporter():
     with open("views/view.html", "r") as file:
         return HTMLResponse(content=file.read(), status_code=200)
-
+@html_router.get("/launch/{launch_id}", response_class=HTMLResponse)
+async def launch_page(launch_id: str):
+    # launch_id is just for routing; JS will extract it from the URL
+    with open("views/launch.html") as f:
+        return HTMLResponse(f.read())
 # Serve 404 page
 @html_router.get("/404", response_class=HTMLResponse)
 async def read_404():

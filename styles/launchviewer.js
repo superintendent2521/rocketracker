@@ -35,7 +35,8 @@ function displayLaunches(launches) {
             <p><strong>Ship:</strong> ${launch.shipNumber} (Flight #${launch.shipFlightCount})</p>
             <p><strong>Site:</strong> ${launch.launchSite}</p>
             ${launch.livestream ? `<p><a href="${launch.livestream}" target="_blank">View Livestream</a></p>` : ''}
-            <p style="position:absolute;bottom:5px;right:5px;font-size:0.6em;color:#888;margin:0;line-height:1;">ID: ${launch._id}</p>
+            <a href="/launch/${launch._id}" style="position:absolute;bottom:35px;right:15px;color:blue;text-decoration:none;font-size:0.8em;"><button>Details</button></a>
+            <p style="position:absolute;bottom:3px;right:5px;font-size:0.6em;color:#888;margin:0;line-height:1;">ID: ${launch._id}</p>
         </div>
     `).join('');
 }
