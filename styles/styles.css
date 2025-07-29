@@ -3,18 +3,76 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #1E1E1E  ;
+    background-color: #1E1E1E;
     color: #e0e0e0;
+}
+
+/* ====== navbar rebuild ====== */
+.navbar {
+    /* inserted missing Flex property */
+    display: flex;
+    justify-content: space-between;   /* logo left, links right      */
+    align-items: center;
+    padding: 0.75rem 2rem;
+    background: #1a1a1a;
+    box-shadow: 0 1px 6px rgba(0,0,0,.4);
+    margin-bottom: 2rem;
+    border-radius: 10px;
+}
+
+/* removed orphaned rules; rebuilt correctly */
+.logo {
+    font-weight: 600;
+    color: #00ff88;
+}
+
+.nav-menu {
+    display: flex;         /* keep items in one row   */
+    list-style: none;
+    gap: 0.5rem;           /* tight spacing like real buttons */
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link {
+    display: inline-block;
+    background: #333;
+    color: #e0e0e0;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all .25s;
+}
+
+.nav-link:focus,
+.nav-link:hover {
+    background: #00ff88;
+    color: #111;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
 h1 {
     text-align: center;
     margin-bottom: 30px;
 }
+
 .content {
     text-align: center;
     margin-bottom: 30px;
 }
+
 form {
     display: flex;
     flex-direction: column;
