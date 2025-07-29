@@ -37,4 +37,9 @@ async def launch_page(launch_id: str):
 async def read_404():
     with open("views/404.html", "r") as file:
         return HTMLResponse(content=file.read(), status_code=404)
-    
+
+# Serve fleet viewer page
+@html_router.get("/fleet", response_class=HTMLResponse)
+async def read_fleet():
+    with open("views/fleet.html", "r") as file:
+        return HTMLResponse(content=file.read(), status_code=200)
