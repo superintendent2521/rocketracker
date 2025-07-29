@@ -116,9 +116,9 @@ function renderFleetSection(containerId, items, type) {
                 </div>
             </div>
             
-            <a href="/viewer?${type.toLowerCase()}=${encodeURIComponent(item.id)}" 
+            <a href="/fleet/${type.toLowerCase()}/${encodeURIComponent(item.id)}" 
                class="mission-link">
-                View All Missions
+                View Details
             </a>
         </div>
     `).join('');

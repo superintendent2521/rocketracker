@@ -1,0 +1,150 @@
+/* Booster Detail Page Styles */
+
+.breadcrumb {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.booster-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.booster-header h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+}
+
+.booster-header .booster-id {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.booster-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.stats-section, .missions-section {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-section h2, .missions-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid #007bff;
+}
+
+.stat-card .stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #007bff;
+    display: block;
+}
+
+.stat-card .stat-label {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.missions-list {
+    display: grid;
+    gap: 15px;
+}
+
+.mission-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+    transition: transform 0.2s;
+}
+
+.mission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mission-card h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.mission-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.mission-detail {
+    font-size: 0.9em;
+}
+
+.mission-detail strong {
+    color: #555;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.error {
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .booster-header {
+        padding: 30px 15px;
+    }
+    
+    .booster-header h1 {
+        font-size: 2em;
+    }
+    
+    .booster-content {
+        padding: 10px;
+    }
+    
+    .stats-section, .missions-section {
+        padding: 20px;
+    }
+}

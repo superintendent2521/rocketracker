@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Details - Rocket Tracker</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/ship.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">🚀 Rocket Tracker</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/viewer" class="nav-link">Launch Viewer</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/reporter" class="nav-link">Report Launch</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/fleet" class="nav-link">Fleet Viewer</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="/fleet">← Back to Fleet</a>
+        </div>
+
+        <div id="ship-header" class="ship-header">
+            <div class="loading">Loading ship details...</div>
+        </div>
+
+        <div class="ship-content">
+            <section class="stats-section">
+                <h2>Statistics</h2>
+                <div id="ship-stats" class="stats-grid">
+                    <div class="loading">Loading statistics...</div>
+                </div>
+            </section>
+
+            <section class="missions-section">
+                <h2>Mission History</h2>
+                <div id="missions-list" class="missions-list">
+                    <div class="loading">Loading missions...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="/styles/ship.js"></script>
+</body>
+</html>
