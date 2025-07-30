@@ -96,10 +96,24 @@ function renderFleetSection(containerId, items, type) {
         return;
     }
     
+    const imgSrc = type === 'Booster' ? '/img/booster.jpg' : '/img/ship.jpg';
+    
     container.innerHTML = items.map(item => `
         <div class="fleet-item">
-            <h3>${type} ${item.id}</h3>
+        
+            <!-- badge pulled up to card level -->
             <span class="id-badge">${item.id}</span>
+        
+            <div class="fleet-header">
+                <div>
+                    <h3>${type} ${item.id}</h3>
+                </div>
+                <img
+                    src="${imgSrc}"
+                    alt="${type} generic"
+                    class="fleet-image"
+                >
+            </div>
             
             <div class="fleet-stats">
                 <div class="stat-item">
@@ -116,13 +130,15 @@ function renderFleetSection(containerId, items, type) {
                 </div>
             </div>
             
-            <a href="/fleet/${type.toLowerCase()}/${encodeURIComponent(item.id)}" 
-               class="mission-link">
-                View Details
-            </a>
+            <a
+                href="/fleet/${type.toLowerCase()}/${encodeURIComponent(item.id)}"
+                class="mission-link"
+            >View Details</a>
         </div>
     `).join('');
 }
+
+
 
 function showError(message) {
     const boostersList = document.getElementById('boosters-list');

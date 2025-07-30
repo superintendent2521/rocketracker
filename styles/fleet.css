@@ -1,4 +1,20 @@
-/* Fleet Viewer Styles */
+/* Position the header as a relative container */
+
+.fleet-header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;   /* pushes right */
+    align-items: center;
+    /* optional gap: add if too close */
+}
+.fleet-image {
+    border-radius: 8px;           /* subtle round corners instead of 50 % */
+    width: 80px;                  /* fixed, readable size */
+    height: 60px;
+    object-fit: cover;
+    flex-shrink: 0;               /* never grow beyond declared size */
+}
+/* (Rest of your existing styles) */
 .fleet-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -47,15 +63,6 @@
     margin-bottom: 10px;
 }
 
-.fleet-item .id-badge {
-    background: rgba(0, 255, 136, 0.2);
-    color: #00ff88;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-family: monospace;
-}
-
 .fleet-stats {
     margin: 15px 0;
 }
@@ -99,7 +106,7 @@
     color: #fff;
 }
 
-.loading {
+.loading, .error, .empty-message {
     color: #ccc;
     text-align: center;
     padding: 40px;
@@ -108,16 +115,9 @@
 
 .error {
     color: #ff4444;
-    text-align: center;
-    padding: 40px;
-    font-size: 1.2em;
 }
 
 .empty-message {
-    color: #ccc;
-    text-align: center;
-    padding: 40px;
-    font-size: 1.2em;
     font-style: italic;
 }
 
