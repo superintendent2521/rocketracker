@@ -15,6 +15,7 @@ load_dotenv(dotenv_path=env_path)
 client = AsyncIOMotorClient(os.getenv('MONGODB_URI'))
 db = client[os.getenv('MONGODB_DB_NAME')]
 collection = db.launch_reports
+news_collection = db.news_posts
 
 async def save(launch_report):
     """Save a launch report to MongoDB"""
@@ -87,3 +88,41 @@ async def get_missions_by_booster(booster_number: str):
     except Exception as e:
         print(f"Error retrieving missions for booster {booster_number}: {e}")
         return []
+
+# News-related database functions
+async def save_news_post(news_post):
+    """Save a news post to MongoDB"""
+    try:
+        result = await news_collection.insert_one(news_post)
+        print(f"Saved news post with id: {result.inserted_id}")
+        return result
+    except Exception as e:
+        print(f"Error saving news post: {e}")
+        return None
+
+async def get_all_news_posts():
+    """Retrieve all news posts, sorted by newest first"""
+    try:
+        cursor = news_collection.find({}).sort("timestamp", -1)
+        posts = await cursor.to_list(length=None)
+        # Convert ObjectId to string for JSON serialization
+        for post in posts:
+            post["_id"] = str(post["_id"])
+        return posts
+    except Exception as e:
+        print(f"Error retrieving news posts: {e}")
+        return []
+
+async def get_specific_news_post(post_id: str):
+    """Retrieve a specific news post by id string"""
+    try:
+        oid = ObjectId(post_id)
+    except Exception:
+        # invalid 24-hex string
+        return None
+
+    post = await news_collection.find_one({"_id": oid})
+    if post:
+        # convert ObjectId back to a readable string before returning
+        post["_id"] = str(post["_id"])
+    return post

@@ -9,7 +9,7 @@ import json
 import re
 
 from datetime import datetime
-from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster
+from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster, save_news_post, get_all_news_posts, get_specific_news_post
 api_router = APIRouter()
 
 
@@ -28,6 +28,35 @@ class LaunchReport(BaseModel):
         if not isinstance(v, int) or v < 0:
             raise ValueError('must be a positive integer')
         return v
+
+class NewsPost(BaseModel):
+    title: str
+    content: str
+    author: str
+    
+    @validator('title')
+    def validate_title(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError('title is required')
+        if len(v) > 100:
+            raise ValueError('title must be 100 characters or less')
+        return v.strip()
+    
+    @validator('content')
+    def validate_content(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError('content is required')
+        if len(v) > 1000:
+            raise ValueError('content must be 1000 characters or less')
+        return v.strip()
+    
+    @validator('author')
+    def validate_author(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError('author is required')
+        if len(v) > 50:
+            raise ValueError('author must be 50 characters or less')
+        return v.strip()
 
 # dont add /api/ it already gives you a /api/ prefix
 # Handle launch report submissions
@@ -73,5 +102,41 @@ async def get_missions_by_booster_id(id: str):
     try:
         missions = await get_missions_by_booster(id)
         return missions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# News API endpoints
+@api_router.post("/news/post")
+async def submit_news_post(post: NewsPost):
+    """Submit a new news post"""
+    try:
+        post_data = post.dict()
+        post_data["timestamp"] = datetime.now().isoformat()
+        result = await save_news_post(post_data)
+        if result:
+            return {"message": "News post submitted successfully", "id": str(result.inserted_id)}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save news post")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/news")
+async def get_news_posts():
+    """Get all news posts"""
+    try:
+        posts = await get_all_news_posts()
+        return posts
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/news/{post_id}")
+async def get_news_post(post_id: str):
+    """Get a specific news post by ID"""
+    try:
+        post = await get_specific_news_post(post_id)
+        if post:
+            return post
+        else:
+            raise HTTPException(status_code=404, detail="News post not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

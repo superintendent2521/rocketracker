@@ -58,3 +58,15 @@ async def read_booster(booster_id: str):
 async def read_ship(ship_id: str):
     with open("views/ship.html", "r", encoding="utf-8") as file:
         return HTMLResponse(content=file.read(), status_code=200)
+
+# Serve news page
+@html_router.get("/news", response_class=HTMLResponse)
+async def read_news():
+    with open("views/news.html", "r", encoding="utf-8") as file:
+        return HTMLResponse(content=file.read(), status_code=200)
+
+# Serve news reporter page
+@html_router.get("/news/reporter", response_class=HTMLResponse)
+async def read_news_reporter():
+    with open("views/newsreporter.html", "r", encoding="utf-8") as file:
+        return HTMLResponse(content=file.read(), status_code=200)

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit News - RocketRacker</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/view.css">
+    <link rel="stylesheet" href="/styles/news.css">
+</head>
+<body>
+    <div class="news-container">
+        <div class="news-form">
+            <h2>Submit News Post</h2>
+            <form id="newsForm">
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input type="text" id="title" name="title" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="author">Author *</label>
+                    <input type="text" id="author" name="author" required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content *</label>
+                    <textarea id="content" name="content" rows="6" required maxlength="1000" placeholder="Supports Markdown formatting..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Preview</label>
+                    <div id="preview" class="markdown-preview"></div>
+                </div>
+                <button type="submit" class="submit-btn">Submit News Post</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/styles/news.js"></script>
+</body>
+</html>
