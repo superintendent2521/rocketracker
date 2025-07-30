@@ -53,12 +53,18 @@ async def get_specific_launch(launch_id: str):
 async def get_missions_by_ship(ship_number: str):
     """Retrieve all missions completed by a specific ship"""
     try:
-        cursor = collection.find({"shipNumber": ship_number})
+        # Convert string to int for database query
+        ship_number_int = int(ship_number)
+        cursor = collection.find({"shipNumber": ship_number_int})
         missions = await cursor.to_list(length=None)
         # Convert ObjectId to string for JSON serialization
         for mission in missions:
             mission["_id"] = str(mission["_id"])
         return missions
+    except ValueError:
+        # Handle case where ship_number is not a valid integer
+        print(f"Invalid ship number format: {ship_number}")
+        return []
     except Exception as e:
         print(f"Error retrieving missions for ship {ship_number}: {e}")
         return []
@@ -66,12 +72,18 @@ async def get_missions_by_ship(ship_number: str):
 async def get_missions_by_booster(booster_number: str):
     """Retrieve all missions completed by a specific booster"""
     try:
-        cursor = collection.find({"boosterNumber": booster_number})
+        # Convert string to int for database query
+        booster_number_int = int(booster_number)
+        cursor = collection.find({"boosterNumber": booster_number_int})
         missions = await cursor.to_list(length=None)
         # Convert ObjectId to string for JSON serialization
         for mission in missions:
             mission["_id"] = str(mission["_id"])
         return missions
+    except ValueError:
+        # Handle case where booster_number is not a valid integer
+        print(f"Invalid booster number format: {booster_number}")
+        return []
     except Exception as e:
         print(f"Error retrieving missions for booster {booster_number}: {e}")
         return []
