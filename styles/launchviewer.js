@@ -17,26 +17,38 @@ async function fetchLaunches() {
         displayLaunches(launches);
     } catch (error) {
         console.error('Error fetching launches:', error);
-        document.getElementById('launch-cards').innerHTML = '<p>Error loading launch data</p>';
+        document.getElementById('launch-cards').innerHTML = '<div class="error">Error loading launch data</div>';
     }
 }
+
 function displayLaunches(launches) {
     const container = document.getElementById('launch-cards');
     
     if (!Array.isArray(launches) || launches.length === 0) {
-        container.innerHTML = '<p>No launches found</p>';
+        container.innerHTML = '<div class="empty-message">No launches found</div>';
         return;
     }
     
     container.innerHTML = launches.map(launch => `
-        <div class="launch-card">
+        <div class="fleet-item">
             <h3>Launch ${launch.launchDate} at ${launch.launchTime}</h3>
-            <p><strong>Booster:</strong> ${launch.boosterNumber} (Flight #${launch.boosterFlightCount})</p>
-            <p><strong>Ship:</strong> ${launch.shipNumber} (Flight #${launch.shipFlightCount})</p>
-            <p><strong>Site:</strong> ${launch.launchSite}</p>
-            ${launch.livestream ? `<p><a href="${launch.livestream}" target="_blank">View Livestream</a></p>` : ''}
-            <a href="/launch/${launch._id}" style="position:absolute;bottom:35px;right:15px;color:blue;text-decoration:none;font-size:0.8em;"><button>Details</button></a>
-            <p style="position:absolute;bottom:3px;right:5px;font-size:0.6em;color:#888;margin:0;line-height:1;">ID: ${launch._id}</p>
+            <div class="fleet-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Booster:</span>
+                    <span class="stat-value">${launch.boosterNumber} (Flight #${launch.boosterFlightCount})</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ship:</span>
+                    <span class="stat-value">${launch.shipNumber} (Flight #${launch.shipFlightCount})</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Site:</span>
+                    <span class="stat-value">${launch.launchSite}</span>
+                </div>
+            </div>
+            ${launch.livestream ? `<a href="${launch.livestream}" target="_blank" class="mission-link">View Livestream</a>` : ''}
+            <a href="/launch/${launch._id}" class="mission-link">View Details</a>
+            <p style="font-size:0.6em;color:#888;margin:10px 0 0 0;line-height:1;">ID: ${launch._id}</p>
         </div>
     `).join('');
 }
