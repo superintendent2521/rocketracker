@@ -23,7 +23,7 @@ class LaunchReport(BaseModel):
     launchTime: str
     livestream: Optional[str] = None
     
-    @validator('boosterNumber', 'shipNumber')
+    @validator('boosterNumber', 'shipNumber', 'boosterFlightCount', 'shipFlightCount')
     def validate_positive_numbers(cls, v):
         if not isinstance(v, int) or v < 0:
             raise ValueError('must be a positive integer')
