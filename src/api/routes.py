@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
-import fastapi
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, validator
 from typing import Optional
 import json
 import re
@@ -23,8 +23,7 @@ class LaunchReport(BaseModel):
     launchTime: str
     livestream: Optional[str] = None
     
-    @field_validator('boosterNumber', 'shipNumber')
-    @validator('boosterNumber', 'shipNumber', 'boosterFlightCount', 'shipFlightCount')
+    @field_validator('boosterNumber', 'shipNumber', 'boosterFlightCount', 'shipFlightCount')
     def validate_positive_numbers(cls, v):
         if not isinstance(v, int) or v < 0:
             raise ValueError('must be a positive integer')
