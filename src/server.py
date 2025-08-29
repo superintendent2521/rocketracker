@@ -1,4 +1,3 @@
-import fastapi
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -10,9 +9,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import json
 from datetime import datetime
-from . import database
 from src.api.routes import api_router
 from src.web.routes import html_router
 app = FastAPI()

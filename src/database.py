@@ -1,6 +1,5 @@
 from pymongo import AsyncMongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
-import asyncio
 from bson import ObjectId
 import os
 from dotenv import load_dotenv

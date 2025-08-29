@@ -1,4 +1,3 @@
-import fastapi
 from fastapi import APIRouter, Request
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -6,7 +5,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import json
 from datetime import datetime
 
 html_router = APIRouter()

@@ -1,12 +1,9 @@
 from fastapi import APIRouter, HTTPException
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, field_validator, validator
 from typing import Optional
-import json
-import re
 
 from datetime import datetime
 from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster, save_news_post, get_all_news_posts, get_specific_news_post, save_mission, get_missions_by_launch
