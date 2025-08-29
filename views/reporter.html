@@ -63,6 +63,11 @@
         <button type="submit">Submit Launch Report</button>
     </form>
 
+    <div style="text-align: center; margin-top: 2rem;">
+        <p>After submitting a launch, you can add missions to it:</p>
+        <a href="/missions/reporter" style="background: #007bff; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">Add Mission to Launch</a>
+    </div>
+
     <script>
         document.getElementById('launchForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -89,6 +94,8 @@
 
                 if (response.ok) {
                     alert('Launch report submitted successfully!');
+                    // Clear form
+                    document.getElementById('launchForm').reset();
                 } else {
                     alert('Error submitting launch report');
                 }

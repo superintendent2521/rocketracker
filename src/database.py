@@ -126,3 +126,29 @@ async def get_specific_news_post(post_id: str):
         # convert ObjectId back to a readable string before returning
         post["_id"] = str(post["_id"])
     return post
+
+# Mission-related database functions
+missions_collection = db.missions
+
+async def save_mission(mission_data):
+    """Save a mission report to MongoDB"""
+    try:
+        result = await missions_collection.insert_one(mission_data)
+        print(f"Saved mission with id: {result.inserted_id}")
+        return result
+    except Exception as e:
+        print(f"Error saving mission: {e}")
+        return None
+
+async def get_missions_by_launch(launch_id: str):
+    """Retrieve all missions for a specific launch"""
+    try:
+        cursor = missions_collection.find({"launch_id": launch_id})
+        missions = await cursor.to_list(length=None)
+        # Convert ObjectId to string for JSON serialization
+        for mission in missions:
+            mission["_id"] = str(mission["_id"])
+        return missions
+    except Exception as e:
+        print(f"Error retrieving missions for launch {launch_id}: {e}")
+        return []

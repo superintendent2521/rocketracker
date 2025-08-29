@@ -3,13 +3,13 @@ import fastapi
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 import json
 import re
 
 from datetime import datetime
-from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster, save_news_post, get_all_news_posts, get_specific_news_post
+from ..database import save, get_all_launches, get_specific_launch, get_missions_by_ship, get_missions_by_booster, save_news_post, get_all_news_posts, get_specific_news_post, save_mission, get_missions_by_launch
 api_router = APIRouter()
 
 
@@ -23,6 +23,7 @@ class LaunchReport(BaseModel):
     launchTime: str
     livestream: Optional[str] = None
     
+    @field_validator('boosterNumber', 'shipNumber')
     @validator('boosterNumber', 'shipNumber', 'boosterFlightCount', 'shipFlightCount')
     def validate_positive_numbers(cls, v):
         if not isinstance(v, int) or v < 0:
@@ -34,7 +35,7 @@ class NewsPost(BaseModel):
     content: str
     author: str
     
-    @validator('title')
+    @field_validator('title')
     def validate_title(cls, v):
         if not v or len(v.strip()) == 0:
             raise ValueError('title is required')
@@ -42,7 +43,7 @@ class NewsPost(BaseModel):
             raise ValueError('title must be 100 characters or less')
         return v.strip()
     
-    @validator('content')
+    @field_validator('content')
     def validate_content(cls, v):
         if not v or len(v.strip()) == 0:
             raise ValueError('content is required')
@@ -50,7 +51,7 @@ class NewsPost(BaseModel):
             raise ValueError('content must be 1000 characters or less')
         return v.strip()
     
-    @validator('author')
+    @field_validator('author')
     def validate_author(cls, v):
         if not v or len(v.strip()) == 0:
             raise ValueError('author is required')
@@ -58,7 +59,37 @@ class NewsPost(BaseModel):
             raise ValueError('author must be 50 characters or less')
         return v.strip()
 
-# dont add /api/ it already gives you a /api/ prefix
+class MissionReport(BaseModel):
+    launch_id: str
+    mission_category: str
+    starlink_count: Optional[int] = None
+    payload_description: Optional[str] = None
+    destination: Optional[str] = None
+    additional_notes: Optional[str] = None
+    
+    @field_validator('mission_category')
+    def validate_category(cls, v):
+        valid_categories = {'starlink', 'propellant', 'cargo', 'crew', 'test', 'other'}
+        if v not in valid_categories:
+            raise ValueError('mission_category must be one of: starlink, propellant, cargo, crew, test, other')
+        return v
+    
+    @field_validator('starlink_count')
+    def validate_starlink_count(cls, v, info):
+        values = info.data
+        if values.get('mission_category') == 'starlink':
+            if v is None or v < 1:
+                raise ValueError('starlink_count is required for starlink missions and must be positive')
+        return v
+    
+    @field_validator('payload_description', 'destination')
+    def validate_general_fields(cls, v, info):
+        values = info.data
+        field_name = info.field_name
+        category = values.get('mission_category')
+        if category and category not in ['starlink', 'propellant']:
+            if not v or len(v.strip()) == 0:
+                raise ValueError(f'{field_name} is required for {category} missions')
 # Handle launch report submissions
 @api_router.post("/report/launch") #await because db operation
 async def submit_launch_report(report: LaunchReport):
@@ -138,5 +169,29 @@ async def get_news_post(post_id: str):
             return post
         else:
             raise HTTPException(status_code=404, detail="News post not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Mission API endpoints
+@api_router.post("/missions")
+async def submit_mission(mission: MissionReport):
+    """Submit a new mission report"""
+    try:
+        mission_data = mission.dict()
+        mission_data["timestamp"] = datetime.now().isoformat()
+        result = await save_mission(mission_data)
+        if result:
+            return {"message": "Mission submitted successfully", "id": str(result.inserted_id)}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save mission")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/missions/{launch_id}")
+async def get_missions_for_launch(launch_id: str):
+    """Get all missions for a specific launch"""
+    try:
+        missions = await get_missions_by_launch(launch_id)
+        return missions
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

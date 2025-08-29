@@ -44,7 +44,14 @@ if (!launchId) {
           ${launch.livestream ? `<a href="${launch.livestream}" target="_blank" class="mission-link">View Livestream</a>` : ''}
           <a href="/viewer" class="mission-link">Back to Launch Viewer</a>
         </div>
+        <div id="missions-section" style="margin-top: 2rem;">
+          <h3>Missions</h3>
+          <div id="missions-list">Loading missions...</div>
+        </div>
       `;
+      
+      // Load missions for this launch
+      loadMissions();
     })
     .catch(() => {
       document.getElementById('launch-detail').innerHTML = `
@@ -55,4 +62,38 @@ if (!launchId) {
         </div>
       `;
     });
+}
+
+async function loadMissions() {
+  try {
+    const response = await fetch(`/api/missions/${launchId}`);
+    const missions = await response.json();
+    
+    const missionsList = document.getElementById('missions-list');
+    
+    if (missions.length === 0) {
+      missionsList.innerHTML = `
+        <p>No missions reported for this launch yet.</p>
+        <a href="/missions/reporter" class="mission-link">Add Mission</a>
+      `;
+    } else {
+      missionsList.innerHTML = missions.map(mission => `
+        <div class="fleet-item" style="margin-bottom: 1rem;">
+          <h4>${mission.mission_category.charAt(0).toUpperCase() + mission.mission_category.slice(1)} Mission</h4>
+          <div class="fleet-stats">
+            ${mission.starlink_count ? `<div class="stat-item"><span class="stat-label">Starlink Satellites:</span><span class="stat-value">${mission.starlink_count}</span></div>` : ''}
+            ${mission.payload_description ? `<div class="stat-item"><span class="stat-label">Payload:</span><span class="stat-value">${mission.payload_description}</span></div>` : ''}
+            ${mission.destination ? `<div class="stat-item"><span class="stat-label">Destination:</span><span class="stat-value">${mission.destination}</span></div>` : ''}
+            ${mission.additional_notes ? `<div class="stat-item"><span class="stat-label">Notes:</span><span class="stat-value">${mission.additional_notes}</span></div>` : ''}
+            <div class="stat-item"><span class="stat-label">Reported:</span><span class="stat-value">${new Date(mission.timestamp).toLocaleString()}</span></div>
+          </div>
+        </div>
+      `).join('');
+      
+      missionsList.innerHTML += `<a href="/missions/reporter" class="mission-link">Add Another Mission</a>`;
+    }
+  } catch (error) {
+    console.error('Error loading missions:', error);
+    document.getElementById('missions-list').innerHTML = '<p>Error loading missions.</p>';
+  }
 }

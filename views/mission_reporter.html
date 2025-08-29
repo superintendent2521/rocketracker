@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Mission - Rocket Tracker</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/mission_reporter.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">Rocket Tracker</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/viewer" class="nav-link">Launch Viewer</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/reporter" class="nav-link">Report Launch</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/fleet" class="nav-link">Fleet Viewer</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="mission-form">
+            <h1 class="form-title">Add Mission to Launch</h1>
+            
+            <div class="form-group launch-selector">
+                <label for="launchSelect">Select Launch:</label>
+                <select id="launchSelect" required>
+                    <option value="">Choose a launch...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Mission Category:</label>
+                <div class="mission-categories">
+                    <div class="category-option">
+                        <input type="radio" id="starlink" name="missionCategory" value="starlink">
+                        <label for="starlink">Starlink</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" id="propellant" name="missionCategory" value="propellant">
+                        <label for="propellant">Propellant</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" id="cargo" name="missionCategory" value="cargo">
+                        <label for="cargo">Cargo</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" id="crew" name="missionCategory" value="crew">
+                        <label for="crew">Crew</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" id="test" name="missionCategory" value="test">
+                        <label for="test">Test</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" id="other" name="missionCategory" value="other">
+                        <label for="other">Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Starlink Fields -->
+            <div id="starlinkFields" class="dynamic-fields">
+                <div class="form-group">
+                    <label for="starlinkCount">Number of Starlink Satellites:</label>
+                    <input type="number" id="starlinkCount" min="1" max="100" placeholder="e.g., 60">
+                </div>
+            </div>
+
+            <!-- Cargo/Crew/Test/Other Fields -->
+            <div id="generalFields" class="dynamic-fields">
+                <div class="form-group">
+                    <label for="payloadDescription">Payload Description:</label>
+                    <textarea id="payloadDescription" rows="3" placeholder="Describe the payload..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="destination">Destination:</label>
+                    <select id="destination">
+                        <option value="">Select destination...</option>
+                        <option value="LEO">Low Earth Orbit (LEO)</option>
+                        <option value="GTO">Geostationary Transfer Orbit (GTO)</option>
+                        <option value="TLI">Trans-Lunar Injection (TLI)</option>
+                        <option value="Lunar">Lunar Surface</option>
+                        <option value="Mars">Mars Transfer</option>
+                        <option value="GEO">Geostationary Orbit (GEO)</option>
+                        <option value="ISS">International Space Station</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Propellant Fields (none needed) -->
+            <div id="propellantFields" class="dynamic-fields">
+                <p>✓ This will be marked as a propellant depot flight</p>
+            </div>
+
+            <div class="form-group">
+                <label for="additionalNotes">Additional Notes (optional):</label>
+                <textarea id="additionalNotes" rows="2" placeholder="Any additional details..."></textarea>
+            </div>
+
+            <button type="submit" onclick="submitMission()">Add Mission</button>
+        </div>
+    </main>
+
+    <script>
+        // Load launches for dropdown
+        async function loadLaunches() {
+            try {
+                const response = await fetch('/api/getlaunches');
+                const launches = await response.json();
+                const select = document.getElementById('launchSelect');
+                
+                launches.forEach(launch => {
+                    const option = document.createElement('option');
+                    option.value = launch._id;
+                    option.textContent = `${launch.launchDate} - Booster ${launch.boosterNumber}, Ship ${launch.shipNumber}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading launches:', error);
+            }
+        }
+
+        // Handle category selection
+        document.querySelectorAll('input[name="missionCategory"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Hide all dynamic fields
+                document.querySelectorAll('.dynamic-fields').forEach(field => {
+                    field.classList.remove('active');
+                });
+
+                // Show relevant fields
+                const category = e.target.value;
+                if (category === 'starlink') {
+                    document.getElementById('starlinkFields').classList.add('active');
+                } else if (category === 'propellant') {
+                    document.getElementById('propellantFields').classList.add('active');
+                } else {
+                    document.getElementById('generalFields').classList.add('active');
+                }
+            });
+        });
+
+        // Submit mission
+        async function submitMission() {
+            const launchId = document.getElementById('launchSelect').value;
+            const category = document.querySelector('input[name="missionCategory"]:checked')?.value;
+            
+            if (!launchId || !category) {
+                alert('Please select a launch and mission category');
+                return;
+            }
+
+            const missionData = {
+                launch_id: launchId,
+                mission_category: category,
+                additional_notes: document.getElementById('additionalNotes').value
+            };
+
+            // Add category-specific data
+            if (category === 'starlink') {
+                missionData.starlink_count = parseInt(document.getElementById('starlinkCount').value);
+            } else if (category !== 'propellant') {
+                missionData.payload_description = document.getElementById('payloadDescription').value;
+                missionData.destination = document.getElementById('destination').value;
+            }
+
+            try {
+                const response = await fetch('/api/missions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(missionData)
+                });
+
+                if (response.ok) {
+                    alert('Mission added successfully!');
+                    // Reset form
+                    document.getElementById('launchSelect').value = '';
+                    document.querySelectorAll('input[name="missionCategory"]').forEach(radio => radio.checked = false);
+                    document.querySelectorAll('.dynamic-fields').forEach(field => field.classList.remove('active'));
+                    document.getElementById('additionalNotes').value = '';
+                } else {
+                    alert('Error adding mission');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding mission');
+            }
+        }
+
+        // Load launches on page load
+        loadLaunches();
+    </script>
+</body>
+</html>

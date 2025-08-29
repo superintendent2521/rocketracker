@@ -70,3 +70,9 @@ async def read_news():
 async def read_news_reporter():
     with open("views/newsreporter.html", "r", encoding="utf-8") as file:
         return HTMLResponse(content=file.read(), status_code=200)
+
+# Serve mission reporter page
+@html_router.get("/missions/reporter", response_class=HTMLResponse)
+async def read_mission_reporter():
+    with open("views/mission_reporter.html", "r", encoding="utf-8") as file:
+        return HTMLResponse(content=file.read(), status_code=200)
