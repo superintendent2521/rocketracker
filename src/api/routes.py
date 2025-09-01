@@ -138,7 +138,7 @@ async def get_launches(request: Request):
 # code of doom an dispair
 @api_router.get("/getlaunches/{launch_id}")
 @limiter.limit("30/minute")
-async def get_id_specific_launch(launch_id: str):
+async def get_id_specific_launch(launch_id: str, request: Request):
     try:
         launches = await get_specific_launch(launch_id)  # call your service/repo
         return launches
@@ -148,7 +148,7 @@ async def get_id_specific_launch(launch_id: str):
 
 @api_router.get("/mission/ship/{id}")
 @limiter.limit("30/minute")
-async def get_missions_by_ship_id(id: str):
+async def get_missions_by_ship_id(id: str, request: Request):
     """Get all missions completed by a specific ship using its assigned number"""
     try:
         missions = await get_missions_by_ship(id)
@@ -159,7 +159,7 @@ async def get_missions_by_ship_id(id: str):
 
 @api_router.get("/mission/booster/{id}")
 @limiter.limit("30/minute")
-async def get_missions_by_booster_id(id: str):
+async def get_missions_by_booster_id(id: str, request: Request):
     """Get all missions completed by a specific booster using its assigned number"""
     try:
         missions = await get_missions_by_booster(id)
@@ -171,7 +171,7 @@ async def get_missions_by_booster_id(id: str):
 # News API endpoints
 @api_router.post("/news/post")
 @limiter.limit("5/minute")
-async def submit_news_post(post: NewsPost):
+async def submit_news_post(post: NewsPost, request: Request):
     """Submit a new news post"""
     try:
         post_data = post.dict()
@@ -190,7 +190,7 @@ async def submit_news_post(post: NewsPost):
 
 @api_router.get("/news")
 @limiter.limit("20/minute")
-async def get_news_posts():
+async def get_news_posts(request: Request):
     """Get all news posts"""
     try:
         posts = await get_all_news_posts()
@@ -201,7 +201,7 @@ async def get_news_posts():
 
 @api_router.get("/news/{post_id}")
 @limiter.limit("30/minute")
-async def get_news_post(post_id: str):
+async def get_news_post(post_id: str, request: Request):
     """Get a specific news post by ID"""
     try:
         post = await get_specific_news_post(post_id)
@@ -216,7 +216,7 @@ async def get_news_post(post_id: str):
 # Mission API endpoints
 @api_router.post("/missions")
 @limiter.limit("5/minute")
-async def submit_mission(mission: MissionReport):
+async def submit_mission(mission: MissionReport, request: Request):
     """Submit a new mission report"""
     try:
         mission_data = mission.dict()
@@ -235,7 +235,7 @@ async def submit_mission(mission: MissionReport):
 
 @api_router.get("/missions/{launch_id}")
 @limiter.limit("30/minute")
-async def get_missions_for_launch(launch_id: str):
+async def get_missions_for_launch(launch_id: str, request: Request):
     """Get all missions for a specific launch, mostly for missions with orbital refueling, like Mars or HLS"""
     try:
         missions = await get_missions_by_launch(launch_id)

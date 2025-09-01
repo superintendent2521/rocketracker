@@ -1,12 +1,15 @@
 # src/web/routes.py
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
-
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 html_router = APIRouter()
 
 
 # Serve index.html
 @html_router.get("/", response_class=HTMLResponse)
+
 async def read_index():
     with open("views/index.html", "r", encoding="utf-8") as file:
         return HTMLResponse(content=file.read(), status_code=200)
