@@ -2,18 +2,22 @@
 async function fetchLaunches() {
     try {
         const response = await fetch('/api/getlaunches');
+        if (response.status === 429) {
+            document.getElementById('launch-cards').innerHTML = '<div class="error">ratelimit, slow down!</div>';
+            return;
+        }
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         // Handle response which might be wrapped in a message object
         const data = await response.json();
-        
+
         // Extract launches array (either directly or from message property)
-        const launches = Array.isArray(data) ? data : 
-                          (data.message && Array.isArray(data.message) ? data.message : 
+        const launches = Array.isArray(data) ? data :
+                          (data.message && Array.isArray(data.message) ? data.message :
                           (data.launches && Array.isArray(data.launches) ? data.launches : []));
-        
+
         displayLaunches(launches);
     } catch (error) {
         console.error('Error fetching launches:', error);

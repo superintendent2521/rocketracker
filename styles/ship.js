@@ -15,10 +15,14 @@ async function loadShipDetails() {
         
         // Fetch specific ship missions
         const response = await fetch(`/api/mission/ship/${encodeURIComponent(shipId)}`);
+        if (response.status === 429) {
+            showError('ratelimit, slow down!');
+            return;
+        }
         if (!response.ok) {
             throw new Error('Failed to fetch ship data');
         }
-        
+
         const shipLaunches = await response.json();
         
         if (shipLaunches.length === 0) {

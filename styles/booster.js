@@ -15,10 +15,14 @@ async function loadBoosterDetails() {
         
         // Fetch specific booster missions
         const response = await fetch(`/api/mission/booster/${encodeURIComponent(boosterId)}`);
+        if (response.status === 429) {
+            showError('ratelimit, slow down!');
+            return;
+        }
         if (!response.ok) {
             throw new Error('Failed to fetch booster data');
         }
-        
+
         const boosterLaunches = await response.json();
         
         if (boosterLaunches.length === 0) {

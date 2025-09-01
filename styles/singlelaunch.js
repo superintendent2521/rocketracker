@@ -10,7 +10,18 @@ if (!launchId) {
   `;
 } else {
   fetch(`/api/getlaunches/${launchId}`)
-    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(r => {
+      if (r.status === 429) {
+        document.getElementById('launch-detail').innerHTML = `
+          <div class="fleet-item">
+            <h3>Error</h3>
+            <p class="error">ratelimit, slow down!</p>
+          </div>
+        `;
+        return Promise.reject('ratelimit');
+      }
+      return r.ok ? r.json() : Promise.reject(r.status);
+    })
     .then(launch => {
       document.getElementById('launch-detail').innerHTML = `
         <div class="fleet-item">
@@ -67,10 +78,14 @@ if (!launchId) {
 async function loadMissions() {
   try {
     const response = await fetch(`/api/missions/${launchId}`);
+    if (response.status === 429) {
+      document.getElementById('missions-list').innerHTML = '<p>ratelimit, slow down!</p>';
+      return;
+    }
     const missions = await response.json();
-    
+
     const missionsList = document.getElementById('missions-list');
-    
+
     if (missions.length === 0) {
       missionsList.innerHTML = `
         <p>No missions reported for this launch yet.</p>
@@ -89,7 +104,7 @@ async function loadMissions() {
           </div>
         </div>
       `).join('');
-      
+
       missionsList.innerHTML += `<a href="/missions/reporter" class="mission-link">Add Another Mission</a>`;
     }
   } catch (error) {

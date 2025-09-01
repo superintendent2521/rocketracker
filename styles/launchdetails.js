@@ -11,6 +11,10 @@ async function fetchLaunch() {
         }
         
         const response = await fetch(`/api/getlaunch/${launchId}`);
+        if (response.status === 429) {
+            document.getElementById('launch-detail').innerHTML = '<p>ratelimit, slow down!</p>';
+            return;
+        }
         if (!response.ok) {
             if (response.status === 404) {
                 throw new Error('Launch not found');
@@ -18,7 +22,7 @@ async function fetchLaunch() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         }
-        
+
         const launch = await response.json();
         displayLaunch(launch);
     } catch (error) {

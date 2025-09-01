@@ -6,10 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadFleetData() {
     try {
         const response = await fetch('/api/getlaunches');
+        if (response.status === 429) {
+            showError('ratelimit, slow down!');
+            return;
+        }
         if (!response.ok) {
             throw new Error('Failed to fetch launch data');
         }
-        
+
         const launches = await response.json();
         processFleetData(launches);
     } catch (error) {

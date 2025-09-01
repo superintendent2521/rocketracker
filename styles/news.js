@@ -77,6 +77,11 @@ class NewsManager {
                 body: JSON.stringify(postData)
             });
 
+            if (response.status === 429) {
+                this.showMessage('ratelimit, slow down!', 'error');
+                return;
+            }
+
             const result = await response.json();
 
             if (response.ok) {
@@ -99,9 +104,18 @@ class NewsManager {
     async loadNewsPosts() {
         try {
             this.newsList.innerHTML = '<div class="loading">Loading news posts...</div>';
-            
+
             const response = await fetch(this.apiUrl);
-            
+
+            if (response.status === 429) {
+                this.newsList.innerHTML = `
+                    <div class="error">
+                        ratelimit, slow down!
+                    </div>
+                `;
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error('Failed to load news posts');
             }

@@ -5,14 +5,20 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi import Request
 from fastapi.exceptions import HTTPException
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from src.api.routes import api_router, limiter
 from src.web.routes import html_router
 
 app = FastAPI()
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler for rate limit exceeded. Returns HTML page."""
+    with open("views/429.html", "r", encoding="utf-8") as file:
+        content = file.read()
+        return HTMLResponse(content=content, status_code=429)
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
 
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
