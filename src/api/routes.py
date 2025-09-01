@@ -1,7 +1,10 @@
 # provides api routes, mostly news/flight
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, field_validator
 from typing import Optional
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from datetime import datetime
 from ..database import (
@@ -18,6 +21,7 @@ from ..database import (
 )
 
 api_router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 class LaunchReport(BaseModel):
@@ -108,7 +112,8 @@ class MissionReport(BaseModel):
 
 # Handle launch report submissions
 @api_router.post("/report/launch")  # await because db operation
-async def submit_launch_report(report: LaunchReport):
+@limiter.limit("5/minute")  # rate limit to 5 per minute per IP
+async def submit_launch_report(report: LaunchReport, request: Request):
 
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
@@ -117,7 +122,8 @@ async def submit_launch_report(report: LaunchReport):
 
 
 @api_router.get("/getlaunches")
-async def get_launches():
+@limiter.limit ("45/minute")
+async def get_launches(request: Request):
     """Get all launch reports"""
     try:
         launches = await get_all_launches()
@@ -131,6 +137,7 @@ async def get_launches():
 
 # code of doom an dispair
 @api_router.get("/getlaunches/{launch_id}")
+@limiter.limit("30/minute")
 async def get_id_specific_launch(launch_id: str):
     try:
         launches = await get_specific_launch(launch_id)  # call your service/repo
@@ -140,6 +147,7 @@ async def get_id_specific_launch(launch_id: str):
 
 
 @api_router.get("/mission/ship/{id}")
+@limiter.limit("30/minute")
 async def get_missions_by_ship_id(id: str):
     """Get all missions completed by a specific ship using its assigned number"""
     try:
@@ -150,6 +158,7 @@ async def get_missions_by_ship_id(id: str):
 
 
 @api_router.get("/mission/booster/{id}")
+@limiter.limit("30/minute")
 async def get_missions_by_booster_id(id: str):
     """Get all missions completed by a specific booster using its assigned number"""
     try:
@@ -161,6 +170,7 @@ async def get_missions_by_booster_id(id: str):
 
 # News API endpoints
 @api_router.post("/news/post")
+@limiter.limit("5/minute")
 async def submit_news_post(post: NewsPost):
     """Submit a new news post"""
     try:
@@ -179,6 +189,7 @@ async def submit_news_post(post: NewsPost):
 
 
 @api_router.get("/news")
+@limiter.limit("20/minute")
 async def get_news_posts():
     """Get all news posts"""
     try:
@@ -189,6 +200,7 @@ async def get_news_posts():
 
 
 @api_router.get("/news/{post_id}")
+@limiter.limit("30/minute")
 async def get_news_post(post_id: str):
     """Get a specific news post by ID"""
     try:
@@ -203,6 +215,7 @@ async def get_news_post(post_id: str):
 
 # Mission API endpoints
 @api_router.post("/missions")
+@limiter.limit("5/minute")
 async def submit_mission(mission: MissionReport):
     """Submit a new mission report"""
     try:
@@ -221,8 +234,9 @@ async def submit_mission(mission: MissionReport):
 
 
 @api_router.get("/missions/{launch_id}")
+@limiter.limit("30/minute")
 async def get_missions_for_launch(launch_id: str):
-    """Get all missions for a specific launch"""
+    """Get all missions for a specific launch, mostly for missions with orbital refueling, like Mars or HLS"""
     try:
         missions = await get_missions_by_launch(launch_id)
         return missions
