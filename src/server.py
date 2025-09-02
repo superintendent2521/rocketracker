@@ -13,7 +13,7 @@ app = FastAPI()
 app.state.limiter = limiter
 
 
-async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
     """Custom handler for rate limit exceeded. Returns HTML page."""
     with open("views/429.html", "r", encoding="utf-8") as file:
         content = file.read()

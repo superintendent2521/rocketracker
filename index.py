@@ -11,6 +11,7 @@ load_dotenv()
 
 
 def required_env(name: str) -> Any:
+    """Get required environment variable or raise error."""
     value = os.getenv(name)
     if value is None:
         raise RuntimeError(f"Environment variable '{name}' is required but not set.")
@@ -33,6 +34,7 @@ try:
             str(port),
         ],
         cwd=os.getcwd(),
+        check=True,
     )
 except KeyboardInterrupt:
     print("Server stopped by user.")

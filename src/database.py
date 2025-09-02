@@ -50,7 +50,7 @@ async def get_specific_launch(launch_id: str):
     """Retrieve a specific launch by id string."""
     try:
         oid = ObjectId(launch_id)
-    except Exception:  # invalid ObjectId format (keep generic here)
+    except (TypeError, ValueError):  # invalid ObjectId format
         return None
 
     launch = await collection.find_one({"_id": oid})
@@ -121,7 +121,7 @@ async def get_specific_news_post(post_id: str):
     """Retrieve a specific news post by id string"""
     try:
         oid = ObjectId(post_id)
-    except Exception:  # invalid ObjectId
+    except (TypeError, ValueError):  # invalid ObjectId
         return None
 
     post = await news_collection.find_one({"_id": oid})
