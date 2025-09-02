@@ -1,12 +1,17 @@
-# provides api routes, mostly news/flight
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, field_validator
-from typing import Optional
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+"""
+API routes module for RocketTracker.
+
+Provides API endpoints for launch reports, news posts, and mission reports.
+Handles CRUD operations for flight data, news, and mission tracking.
+"""
 
 from datetime import datetime
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, field_validator
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from ..database import (
     save,
     get_all_launches,
@@ -18,13 +23,14 @@ from ..database import (
     get_specific_news_post,
     save_mission,
     get_missions_by_launch,
-)
+)  # noqa: E0402
 
 api_router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
 class LaunchReport(BaseModel):
+    """Model for launch report submissions."""
     boosterNumber: int
     shipNumber: int
     boosterFlightCount: int
@@ -37,19 +43,24 @@ class LaunchReport(BaseModel):
     @field_validator(
         "boosterNumber", "shipNumber", "boosterFlightCount", "shipFlightCount"
     )
+    @classmethod
     def validate_positive_numbers(cls, v):
+        """Validate that the value is a positive integer."""
         if not isinstance(v, int) or v < 0:
             raise ValueError("must be a positive integer")
         return v
 
 
 class NewsPost(BaseModel):
+    """Model for news post submissions."""
     title: str
     content: str
     author: str
 
     @field_validator("title")
+    @classmethod
     def validate_title(cls, v):
+        """Validate the title field."""
         if not v or len(v.strip()) == 0:
             raise ValueError("title is required")
         if len(v) > 100:
@@ -57,7 +68,9 @@ class NewsPost(BaseModel):
         return v.strip()
 
     @field_validator("content")
+    @classmethod
     def validate_content(cls, v):
+        """Validate the content field."""
         if not v or len(v.strip()) == 0:
             raise ValueError("content is required")
         if len(v) > 1000:
@@ -65,7 +78,9 @@ class NewsPost(BaseModel):
         return v.strip()
 
     @field_validator("author")
+    @classmethod
     def validate_author(cls, v):
+        """Validate the author field."""
         if not v or len(v.strip()) == 0:
             raise ValueError("author is required")
         if len(v) > 50:
@@ -74,6 +89,7 @@ class NewsPost(BaseModel):
 
 
 class MissionReport(BaseModel):
+    """Model for mission report submissions."""
     launch_id: str
     mission_category: str
     starlink_count: Optional[int] = None
@@ -82,16 +98,21 @@ class MissionReport(BaseModel):
     additional_notes: Optional[str] = None
 
     @field_validator("mission_category")
+    @classmethod
     def validate_category(cls, v):
+        """Validate the mission category."""
         valid_categories = {"starlink", "propellant", "cargo", "crew", "test", "other"}
         if v not in valid_categories:
             raise ValueError(
-                "mission_category must be one of: starlink, propellant, cargo, crew, test, other"
+                "mission_category must be one of: starlink, propellant, "
+                "cargo, crew, test, other"
             )
         return v
 
     @field_validator("starlink_count")
+    @classmethod
     def validate_starlink_count(cls, v, info):
+        """Validate the starlink count for starlink missions."""
         values = info.data
         if values.get("mission_category") == "starlink":
             if v is None or v < 1:
@@ -101,7 +122,9 @@ class MissionReport(BaseModel):
         return v
 
     @field_validator("payload_description", "destination")
+    @classmethod
     def validate_general_fields(cls, v, info):
+        """Validate general fields based on mission category."""
         values = info.data
         field_name = info.field_name
         category = values.get("mission_category")
@@ -113,8 +136,8 @@ class MissionReport(BaseModel):
 # Handle launch report submissions
 @api_router.post("/report/launch")  # await because db operation
 @limiter.limit("5/minute")  # rate limit to 5 per minute per IP
-async def submit_launch_report(report: LaunchReport, request: Request):
-
+async def submit_launch_report(report: LaunchReport, _request: Request):
+    """Submit a launch report."""
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
     await save(report_data)  # save to db, uses await however not here, in db module
@@ -122,8 +145,8 @@ async def submit_launch_report(report: LaunchReport, request: Request):
 
 
 @api_router.get("/getlaunches")
-@limiter.limit ("45/minute")
-async def get_launches(request: Request):
+@limiter.limit("45/minute")
+async def get_launches(_request: Request):
     """Get all launch reports"""
     try:
         launches = await get_all_launches()
@@ -132,46 +155,47 @@ async def get_launches(request: Request):
             launch["_id"] = str(launch["_id"])
         return launches  # Return array directly
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # code of doom an dispair
 @api_router.get("/getlaunches/{launch_id}")
 @limiter.limit("30/minute")
-async def get_id_specific_launch(launch_id: str, request: Request):
+async def get_id_specific_launch(launch_id: str, _request: Request):
+    """Get a specific launch by ID."""
     try:
         launches = await get_specific_launch(launch_id)  # call your service/repo
         return launches
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@api_router.get("/mission/ship/{id}")
+@api_router.get("/mission/ship/{ship_id}")
 @limiter.limit("30/minute")
-async def get_missions_by_ship_id(id: str, request: Request):
+async def get_missions_by_ship_id(ship_id: str, _request: Request):
     """Get all missions completed by a specific ship using its assigned number"""
     try:
-        missions = await get_missions_by_ship(id)
+        missions = await get_missions_by_ship(ship_id)
         return missions
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@api_router.get("/mission/booster/{id}")
+@api_router.get("/mission/booster/{booster_id}")
 @limiter.limit("30/minute")
-async def get_missions_by_booster_id(id: str, request: Request):
+async def get_missions_by_booster_id(booster_id: str, _request: Request):
     """Get all missions completed by a specific booster using its assigned number"""
     try:
-        missions = await get_missions_by_booster(id)
+        missions = await get_missions_by_booster(booster_id)
         return missions
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # News API endpoints
 @api_router.post("/news/post")
 @limiter.limit("5/minute")
-async def submit_news_post(post: NewsPost, request: Request):
+async def submit_news_post(post: NewsPost, _request: Request):
     """Submit a new news post"""
     try:
         post_data = post.dict()
@@ -182,41 +206,39 @@ async def submit_news_post(post: NewsPost, request: Request):
                 "message": "News post submitted successfully",
                 "id": str(result.inserted_id),
             }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to save news post")
+        raise HTTPException(status_code=500, detail="Failed to save news post")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @api_router.get("/news")
 @limiter.limit("20/minute")
-async def get_news_posts(request: Request):
+async def get_news_posts(_request: Request):
     """Get all news posts"""
     try:
         posts = await get_all_news_posts()
         return posts
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @api_router.get("/news/{post_id}")
 @limiter.limit("30/minute")
-async def get_news_post(post_id: str, request: Request):
+async def get_news_post(post_id: str, _request: Request):
     """Get a specific news post by ID"""
     try:
         post = await get_specific_news_post(post_id)
         if post:
             return post
-        else:
-            raise HTTPException(status_code=404, detail="News post not found")
+        raise HTTPException(status_code=404, detail="News post not found")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # Mission API endpoints
 @api_router.post("/missions")
 @limiter.limit("5/minute")
-async def submit_mission(mission: MissionReport, request: Request):
+async def submit_mission(mission: MissionReport, _request: Request):
     """Submit a new mission report"""
     try:
         mission_data = mission.dict()
@@ -227,18 +249,17 @@ async def submit_mission(mission: MissionReport, request: Request):
                 "message": "Mission submitted successfully",
                 "id": str(result.inserted_id),
             }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to save mission")
+        raise HTTPException(status_code=500, detail="Failed to save mission")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @api_router.get("/missions/{launch_id}")
 @limiter.limit("30/minute")
-async def get_missions_for_launch(launch_id: str, request: Request):
-    """Get all missions for a specific launch, mostly for missions with orbital refueling, like Mars or HLS"""
+async def get_missions_for_launch(launch_id: str, _request: Request):
+    """Get all missions for a specific launch, for refueling missions. like Mars or HLS"""
     try:
         missions = await get_missions_by_launch(launch_id)
         return missions
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
