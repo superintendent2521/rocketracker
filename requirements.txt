@@ -5,3 +5,4 @@ pymongo
 fastapi
 slowapi
 pydantic
+pytest

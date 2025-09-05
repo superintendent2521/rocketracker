@@ -21,7 +21,6 @@ def required_env(name: str) -> Any:
 port = int(required_env("PORT"))
 dev = required_env("DEV")
 
-print(port, dev, os.getcwd())
 try:
     subprocess.run(
         [
@@ -36,6 +35,7 @@ try:
         cwd=os.getcwd(),
         check=True,
     )
+    print(port, dev, os.getcwd())
 except KeyboardInterrupt:
     print("Server stopped by user.")
 except Exception as e:

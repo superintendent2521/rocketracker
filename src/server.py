@@ -1,5 +1,7 @@
 """This module handles API routes."""
 
+from dotenv import load_dotenv
+import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -18,10 +20,15 @@ async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
     with open("views/429.html", "r", encoding="utf-8") as file:
         content = file.read()
         return HTMLResponse(content=content, status_code=429)
+env_path = ".env"
+load_dotenv(dotenv_path=env_path)
+print("Loaded environment variables from .env file")
 
-
-app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
-
+if os.getenv('RATELIMIT', 'true').lower() == 'true':
+    app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
+    print("Rate limiting is enabled")
+else:
+    print("Rate limiting is disabled")
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
 app.mount("/img", StaticFiles(directory="img"), name="img")
