@@ -1,7 +1,7 @@
 """This module handles API routes."""
 
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -20,8 +20,8 @@ async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
     with open("views/429.html", "r", encoding="utf-8") as file:
         content = file.read()
         return HTMLResponse(content=content, status_code=429)
-env_path = ".env"
-load_dotenv(dotenv_path=env_path)
+ENV_PATH = ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 print("Loaded environment variables from .env file")
 
 if os.getenv('RATELIMIT', 'true').lower() == 'true':
