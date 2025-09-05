@@ -22,6 +22,7 @@ port = int(required_env("PORT"))
 dev = required_env("DEV")
 
 try:
+    print(port, dev, os.getcwd())
     subprocess.run(
         [
             "uvicorn",
@@ -35,7 +36,6 @@ try:
         cwd=os.getcwd(),
         check=True,
     )
-    print(port, dev, os.getcwd())
 except KeyboardInterrupt:
     print("Server stopped by user.")
 except Exception as e:
