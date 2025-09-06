@@ -29,9 +29,9 @@ missions_collection = db.missions
 async def test_motor_connection():
     try:
         await client.admin.command("ping")
-        print("✅ Connected to MongoDB")
+        logger.info("Connected to MongoDB")
     except ServerSelectionTimeoutError as e:
-        print("❌ Could not connect:", e)
+        logger.error(f"Could not connect to MongoDB: {e}")
 
 async def save(launch_report):
     """Save a launch report to MongoDB"""
