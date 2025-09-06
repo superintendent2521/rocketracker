@@ -11,3 +11,4 @@ security.md
 .env
 .ruff_cache/
 logs/*
+future.txt

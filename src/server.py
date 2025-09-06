@@ -1,6 +1,8 @@
 """This module handles API routes."""
 
 import os
+from datetime import datetime
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -9,21 +11,20 @@ from fastapi import Request
 from fastapi.exceptions import HTTPException
 from slowapi.errors import RateLimitExceeded
 from loguru import logger
+from src.database import test_motor_connection
 from src.api.routes import api_router, limiter
 from src.web.routes import html_router
-from datetime import datetime
-logger_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Windows is a bitch and doesnt like semicolons in files.
-logger.add(f"logs/app_{logger_date}.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
-
-logger.add("logs/app.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
+# Windows is a bitch and doesnt like semicolons in files.
+logger_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+logger.add(f"logs/app_{logger_date}.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}") # pylint: disable=C0301
 
 app = FastAPI()
 app.state.limiter = limiter
 
-from src.database import test_motor_connection
 
 @app.on_event("startup")
 async def startup_event():
+    """On server startup, test MongoDB connection, can be used for more stuff."""
     connected = await test_motor_connection()
     if not connected:
         logger.warning("MongoDB connection failed, but continuing startup.")

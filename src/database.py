@@ -8,12 +8,10 @@ import os
 import asyncio
 from pathlib import Path
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.errors import ServerSelectionTimeoutError
-from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from dotenv import load_dotenv
 from loguru import logger
-from pymongo.errors import PyMongoError
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
 
 # Load environment variables from parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -28,10 +26,11 @@ missions_collection = db.missions
 
 # Test connection to MongoDB
 async def test_motor_connection():
+    """Test connection to MongoDB with a 5 second timeout."""
     try:
         # hard cap at 5s using asyncio
         await asyncio.wait_for(
-            client.admin.command("ping", timeoutMS=5000),  # server execution timeout
+            client.admin.command("ping"),  # test connection
             timeout=5                                      # coroutine-level timeout
         )
         logger.info("Connected to MongoDB")
@@ -56,6 +55,7 @@ async def get_all_launches():
     try:
         cursor = collection.find({})
         launches = await cursor.to_list(length=None)
+        logger.info("Retrieved all launches")
         return launches
     except PyMongoError as e:
         logger.error(f"Database error retrieving launches: {e}")
@@ -66,6 +66,7 @@ async def get_specific_launch(launch_id: str):
     """Retrieve a specific launch by id string."""
     try:
         oid = ObjectId(launch_id)
+        logger.info(f"Retrieving launch with id: {launch_id}")
     except (TypeError, ValueError):  # invalid ObjectId format
         logger.warning(f"Invalid ObjectId format: {launch_id}")
         return None
