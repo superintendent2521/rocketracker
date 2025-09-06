@@ -5,6 +5,7 @@ save and retrieve launch reports, news posts, and mission data.
 """
 
 import os
+import asyncio
 from pathlib import Path
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ServerSelectionTimeoutError
@@ -28,10 +29,16 @@ missions_collection = db.missions
 # Test connection to MongoDB
 async def test_motor_connection():
     try:
-        await client.admin.command("ping")
+        # hard cap at 5s using asyncio
+        await asyncio.wait_for(
+            client.admin.command("ping", timeoutMS=5000),  # server execution timeout
+            timeout=5                                      # coroutine-level timeout
+        )
         logger.info("Connected to MongoDB")
-    except ServerSelectionTimeoutError as e:
+        return True
+    except (ServerSelectionTimeoutError, asyncio.TimeoutError) as e:
         logger.error(f"Could not connect to MongoDB: {e}")
+        return False
 
 async def save(launch_report):
     """Save a launch report to MongoDB"""

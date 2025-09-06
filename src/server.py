@@ -11,8 +11,9 @@ from slowapi.errors import RateLimitExceeded
 from loguru import logger
 from src.api.routes import api_router, limiter
 from src.web.routes import html_router
-
-logger.add("logs/app.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
+from datetime import datetime
+logger_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Windows is a bitch and doesnt like semicolons in files.
+logger.add(f"logs/app_{logger_date}.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
 
 app = FastAPI()
 app.state.limiter = limiter
@@ -21,7 +22,9 @@ from src.database import test_motor_connection
 
 @app.on_event("startup")
 async def startup_event():
-    await test_motor_connection()
+    connected = await test_motor_connection()
+    if not connected:
+        logger.warning("MongoDB connection failed, but continuing startup.")
 
 
 async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
