@@ -14,9 +14,16 @@ from loguru import logger
 from src.database import test_motor_connection
 from src.api.routes import api_router, limiter
 from src.web.routes import html_router
+
 # Windows is a bitch and doesnt like semicolons in files.
 logger_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-logger.add(f"logs/app_{logger_date}.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}") # pylint: disable=C0301
+logger.add(
+    f"logs/app_{logger_date}.log",
+    rotation="10 MB",
+    retention="10 days",
+    level="INFO",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+)  # pylint: disable=C0301
 
 app = FastAPI()
 app.state.limiter = limiter
@@ -35,11 +42,13 @@ async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
     with open("views/429.html", "r", encoding="utf-8") as file:
         content = file.read()
         return HTMLResponse(content=content, status_code=429)
+
+
 ENV_PATH = ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 logger.info("Loaded environment variables from .env file")
 
-if os.getenv('RATELIMIT', 'true').lower() == 'true':
+if os.getenv("RATELIMIT", "true").lower() == "true":
     app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
     logger.info("Rate limiting is enabled")
 else:

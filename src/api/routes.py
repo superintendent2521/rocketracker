@@ -31,6 +31,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 class LaunchReport(BaseModel):
     """Model for launch report submissions."""
+
     boosterNumber: int
     shipNumber: int
     boosterFlightCount: int
@@ -53,6 +54,7 @@ class LaunchReport(BaseModel):
 
 class NewsPost(BaseModel):
     """Model for news post submissions."""
+
     title: str
     content: str
     author: str
@@ -90,6 +92,7 @@ class NewsPost(BaseModel):
 
 class MissionReport(BaseModel):
     """Model for mission report submissions."""
+
     launch_id: str
     mission_category: str
     starlink_count: Optional[int] = None
@@ -212,7 +215,9 @@ async def submit_news_post(post: NewsPost, request: Request):
         post_data["timestamp"] = datetime.now().isoformat()
         result = await save_news_post(post_data)
         if result:
-            logger.info(f"News post submitted successfully with id: {result.inserted_id}")
+            logger.info(
+                f"News post submitted successfully with id: {result.inserted_id}"
+            )
             return {
                 "message": "News post submitted successfully",
                 "id": str(result.inserted_id),

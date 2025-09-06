@@ -41,7 +41,9 @@ async def read_viewer(request: Request):  # pylint: disable=unused-argument
 
 @html_router.get("/launch/{launch_id}", response_class=HTMLResponse)
 @limiter.limit("45/minute")
-async def launch_page(launch_id: str, request: Request):  # pylint: disable=unused-argument
+async def launch_page(
+    launch_id: str, request: Request
+):  # pylint: disable=unused-argument
     """Serve the launch page."""
     # launch_id is just for routing; JS will extract it from the URL
     with open("views/launch.html", "r", encoding="utf-8") as f:
@@ -69,7 +71,9 @@ async def read_fleet(request: Request):  # pylint: disable=unused-argument
 # Serve individual booster page
 @html_router.get("/fleet/booster/{booster_id}", response_class=HTMLResponse)
 @limiter.limit("45/minute")
-async def read_booster(booster_id: str, request: Request):  # pylint: disable=unused-argument
+async def read_booster(
+    booster_id: str, request: Request
+):  # pylint: disable=unused-argument
     """Serve the individual booster page."""
     with open("views/booster.html", "r", encoding="utf-8") as file:
         return HTMLResponse(content=file.read(), status_code=200)
