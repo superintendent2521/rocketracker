@@ -56,6 +56,7 @@ else:
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
 app.mount("/img", StaticFiles(directory="img"), name="img")
+app.mount("/scripts", StaticFiles(directory="scripts"), name="scripts")
 app.include_router(api_router, prefix="/api")
 app.include_router(html_router)
 
