@@ -15,6 +15,8 @@ from datetime import datetime
 logger_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Windows is a bitch and doesnt like semicolons in files.
 logger.add(f"logs/app_{logger_date}.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
 
+logger.add("logs/app.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
+
 app = FastAPI()
 app.state.limiter = limiter
 
