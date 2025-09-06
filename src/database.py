@@ -5,13 +5,13 @@ save and retrieve launch reports, news posts, and mission data.
 """
 
 import os
+import asyncio
 from pathlib import Path
-from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.errors import ServerSelectionTimeoutError
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from dotenv import load_dotenv
-from pymongo.errors import PyMongoError
+from loguru import logger
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
 
 # Load environment variables from parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -24,22 +24,31 @@ collection = db.launch_reports
 news_collection = db.news_posts
 missions_collection = db.missions
 
+
 # Test connection to MongoDB
 async def test_motor_connection():
+    """Test connection to MongoDB with a 5 second timeout."""
     try:
-        await client.admin.command("ping")
-        print("✅ Connected to MongoDB")
-    except ServerSelectionTimeoutError as e:
-        print("❌ Could not connect:", e)
+        # hard cap at 5s using asyncio
+        await asyncio.wait_for(
+            client.admin.command("ping"),  # test connection
+            timeout=5,  # coroutine-level timeout
+        )
+        logger.info("Connected to MongoDB")
+        return True
+    except (ServerSelectionTimeoutError, asyncio.TimeoutError) as e:
+        logger.error(f"Could not connect to MongoDB: {e}")
+        return False
+
 
 async def save(launch_report):
     """Save a launch report to MongoDB"""
     try:
         result = await collection.insert_one(launch_report)
-        print(f"Saved report with id: {result.inserted_id}")
+        logger.info(f"Saved report with id: {result.inserted_id}")
         return result
     except PyMongoError as e:
-        print(f"Database error saving report: {e}")
+        logger.error(f"Database error saving report: {e}")
         return None
 
 
@@ -48,9 +57,10 @@ async def get_all_launches():
     try:
         cursor = collection.find({})
         launches = await cursor.to_list(length=None)
+        logger.info("Retrieved all launches")
         return launches
     except PyMongoError as e:
-        print(f"Database error retrieving launches: {e}")
+        logger.error(f"Database error retrieving launches: {e}")
         return []
 
 
@@ -58,7 +68,9 @@ async def get_specific_launch(launch_id: str):
     """Retrieve a specific launch by id string."""
     try:
         oid = ObjectId(launch_id)
+        logger.info(f"Retrieving launch with id: {launch_id}")
     except (TypeError, ValueError):  # invalid ObjectId format
+        logger.warning(f"Invalid ObjectId format: {launch_id}")
         return None
 
     launch = await collection.find_one({"_id": oid})
@@ -77,10 +89,10 @@ async def get_missions_by_ship(ship_number: str):
             mission["_id"] = str(mission["_id"])
         return missions
     except ValueError:
-        print(f"Invalid ship number format: {ship_number}")
+        logger.warning(f"Invalid ship number format: {ship_number}")
         return []
     except PyMongoError as e:
-        print(f"Database error retrieving missions for ship {ship_number}: {e}")
+        logger.error(f"Database error retrieving missions for ship {ship_number}: {e}")
         return []
 
 
@@ -94,10 +106,12 @@ async def get_missions_by_booster(booster_number: str):
             mission["_id"] = str(mission["_id"])
         return missions
     except ValueError:
-        print(f"Invalid booster number format: {booster_number}")
+        logger.warning(f"Invalid booster number format: {booster_number}")
         return []
     except PyMongoError as e:
-        print(f"Database error retrieving missions for booster {booster_number}: {e}")
+        logger.error(
+            f"Database error retrieving missions for booster {booster_number}: {e}"
+        )
         return []
 
 
@@ -105,10 +119,10 @@ async def save_news_post(news_post):
     """Save a news post to MongoDB"""
     try:
         result = await news_collection.insert_one(news_post)
-        print(f"Saved news post with id: {result.inserted_id}")
+        logger.info(f"Saved news post with id: {result.inserted_id}")
         return result
     except PyMongoError as e:
-        print(f"Database error saving news post: {e}")
+        logger.error(f"Database error saving news post: {e}")
         return None
 
 
@@ -121,7 +135,7 @@ async def get_all_news_posts():
             post["_id"] = str(post["_id"])
         return posts
     except PyMongoError as e:
-        print(f"Database error retrieving news posts: {e}")
+        logger.error(f"Database error retrieving news posts: {e}")
         return []
 
 
@@ -130,6 +144,7 @@ async def get_specific_news_post(post_id: str):
     try:
         oid = ObjectId(post_id)
     except (TypeError, ValueError):  # invalid ObjectId
+        logger.warning(f"Invalid ObjectId for news post: {post_id}")
         return None
 
     post = await news_collection.find_one({"_id": oid})
@@ -142,10 +157,10 @@ async def save_mission(mission_data):
     """Save a mission report to MongoDB"""
     try:
         result = await missions_collection.insert_one(mission_data)
-        print(f"Saved mission with id: {result.inserted_id}")
+        logger.info(f"Saved mission with id: {result.inserted_id}")
         return result
     except PyMongoError as e:
-        print(f"Database error saving mission: {e}")
+        logger.error(f"Database error saving mission: {e}")
         return None
 
 
@@ -153,10 +168,11 @@ async def get_missions_by_launch(launch_id: str):
     """Retrieve all missions for a specific launch"""
     try:
         cursor = missions_collection.find({"launch_id": launch_id})
+        logger.info(f"Retrieving missions for launch id: {launch_id}")
         missions = await cursor.to_list(length=None)
         for mission in missions:
             mission["_id"] = str(mission["_id"])
         return missions
     except PyMongoError as e:
-        print(f"Database error retrieving missions for launch {launch_id}: {e}")
+        logger.error(f"Database error retrieving missions for launch {launch_id}: {e}")
         return []

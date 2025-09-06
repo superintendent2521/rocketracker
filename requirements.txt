@@ -6,3 +6,4 @@ fastapi
 slowapi
 pydantic
 pytest
+loguru

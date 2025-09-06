@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, field_validator
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from loguru import logger
 from ..database import (
     save,
     get_all_launches,
@@ -30,6 +31,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 class LaunchReport(BaseModel):
     """Model for launch report submissions."""
+
     boosterNumber: int
     shipNumber: int
     boosterFlightCount: int
@@ -52,6 +54,7 @@ class LaunchReport(BaseModel):
 
 class NewsPost(BaseModel):
     """Model for news post submissions."""
+
     title: str
     content: str
     author: str
@@ -89,6 +92,7 @@ class NewsPost(BaseModel):
 
 class MissionReport(BaseModel):
     """Model for mission report submissions."""
+
     launch_id: str
     mission_category: str
     starlink_count: Optional[int] = None
@@ -140,6 +144,7 @@ async def submit_launch_report(report: LaunchReport, request: Request):
     report_data = report.dict()
     report_data["timestamp"] = datetime.now().isoformat()
     await save(report_data)  # save to db, uses await however not here, in db module
+    logger.info("Launch report submitted successfully")
     return {"message": "Launch report submitted successfully"}
 
 
@@ -152,8 +157,10 @@ async def get_launches(request: Request):
         # Convert ObjectId to string for JSON serialization
         for launch in launches:
             launch["_id"] = str(launch["_id"])
+        logger.info("Retrieved all launches")
         return launches  # Return array directly
     except Exception as e:
+        logger.error(f"Error retrieving launches: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -164,8 +171,11 @@ async def get_id_specific_launch(launch_id: str, request: Request):
     """Get a specific launch by ID."""
     try:
         launches = await get_specific_launch(launch_id)  # call your service/repo
+        if launches:
+            logger.info(f"Retrieved specific launch {launch_id}")
         return launches
     except Exception as e:
+        logger.error(f"Error retrieving specific launch {launch_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -175,8 +185,10 @@ async def get_missions_by_ship_id(ship_id: str, request: Request):
     """Get all missions completed by a specific ship using its assigned number"""
     try:
         missions = await get_missions_by_ship(ship_id)
+        logger.info(f"Retrieved missions for ship {ship_id}")
         return missions
     except Exception as e:
+        logger.error(f"Error retrieving missions for ship {ship_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -186,8 +198,10 @@ async def get_missions_by_booster_id(booster_id: str, request: Request):
     """Get all missions completed by a specific booster using its assigned number"""
     try:
         missions = await get_missions_by_booster(booster_id)
+        logger.info(f"Retrieved missions for booster {booster_id}")
         return missions
     except Exception as e:
+        logger.error(f"Error retrieving missions for booster {booster_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -201,12 +215,16 @@ async def submit_news_post(post: NewsPost, request: Request):
         post_data["timestamp"] = datetime.now().isoformat()
         result = await save_news_post(post_data)
         if result:
+            logger.info(
+                f"News post submitted successfully with id: {result.inserted_id}"
+            )
             return {
                 "message": "News post submitted successfully",
                 "id": str(result.inserted_id),
             }
         raise HTTPException(status_code=500, detail="Failed to save news post")
     except Exception as e:
+        logger.error(f"Error submitting news post: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -216,8 +234,10 @@ async def get_news_posts(request: Request):
     """Get all news posts"""
     try:
         posts = await get_all_news_posts()
+        logger.info("Retrieved all news posts")
         return posts
     except Exception as e:
+        logger.error(f"Error retrieving news posts: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -228,9 +248,11 @@ async def get_news_post(post_id: str, request: Request):
     try:
         post = await get_specific_news_post(post_id)
         if post:
+            logger.info(f"Retrieved specific news post {post_id}")
             return post
         raise HTTPException(status_code=404, detail="News post not found")
     except Exception as e:
+        logger.error(f"Error retrieving specific news post {post_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -244,12 +266,14 @@ async def submit_mission(mission: MissionReport, request: Request):
         mission_data["timestamp"] = datetime.now().isoformat()
         result = await save_mission(mission_data)
         if result:
+            logger.info(f"Mission submitted successfully with id: {result.inserted_id}")
             return {
                 "message": "Mission submitted successfully",
                 "id": str(result.inserted_id),
             }
         raise HTTPException(status_code=500, detail="Failed to save mission")
     except Exception as e:
+        logger.error(f"Error submitting mission: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
@@ -259,6 +283,8 @@ async def get_missions_for_launch(launch_id: str, request: Request):
     """Get all missions for a specific launch, for refueling missions. like Mars or HLS"""
     try:
         missions = await get_missions_by_launch(launch_id)
+        logger.info(f"Retrieved missions for launch {launch_id}")
         return missions
     except Exception as e:
+        logger.error(f"Error retrieving missions for launch {launch_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
