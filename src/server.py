@@ -14,6 +14,12 @@ from src.web.routes import html_router
 app = FastAPI()
 app.state.limiter = limiter
 
+from src.database import test_motor_connection
+
+@app.on_event("startup")
+async def startup_event():
+    await test_motor_connection()
+
 
 async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
     """Custom handler for rate limit exceeded. Returns HTML page."""
