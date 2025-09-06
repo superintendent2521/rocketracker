@@ -10,3 +10,4 @@ security.md
 #how the fuck did i almost forget this
 .env
 .ruff_cache/
+logs/*
