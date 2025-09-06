@@ -8,8 +8,11 @@ from fastapi.responses import HTMLResponse
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from slowapi.errors import RateLimitExceeded
+from loguru import logger
 from src.api.routes import api_router, limiter
 from src.web.routes import html_router
+
+logger.add("logs/app.log", rotation="10 MB", retention="10 days", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
 
 app = FastAPI()
 app.state.limiter = limiter
@@ -28,13 +31,13 @@ async def custom_rate_limit_handler(_request: Request, _exc: RateLimitExceeded):
         return HTMLResponse(content=content, status_code=429)
 ENV_PATH = ".env"
 load_dotenv(dotenv_path=ENV_PATH)
-print("Loaded environment variables from .env file")
+logger.info("Loaded environment variables from .env file")
 
 if os.getenv('RATELIMIT', 'true').lower() == 'true':
     app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
-    print("Rate limiting is enabled")
+    logger.info("Rate limiting is enabled")
 else:
-    print("Rate limiting is disabled")
+    logger.info("Rate limiting is disabled")
 # Serve static files (CSS, JS, images, etc.)
 app.mount("/styles", StaticFiles(directory="styles"), name="styles")
 app.mount("/img", StaticFiles(directory="img"), name="img")
