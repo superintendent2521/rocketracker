@@ -96,6 +96,7 @@ class MissionReport(BaseModel):
     launch_id: str
     mission_category: str
     starlink_count: Optional[int] = None
+    group: Optional[str] = None
     payload_description: Optional[str] = None
     destination: Optional[str] = None
     additional_notes: Optional[str] = None
@@ -123,6 +124,16 @@ class MissionReport(BaseModel):
                     "starlink_count is required for starlink missions and must be positive"
                 )
         return v
+
+    @field_validator("group")
+    @classmethod
+    def validate_group(cls, v, info):
+        """Validate the group for starlink missions."""
+        values = info.data
+        if values.get("mission_category") == "starlink":
+            if not v or len(v.strip()) == 0:
+                raise ValueError("group is required for starlink missions")
+        return v.strip() if v else None
 
     @field_validator("payload_description", "destination")
     @classmethod
